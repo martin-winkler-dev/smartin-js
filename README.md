@@ -1,6 +1,7 @@
 # smartin
 
 [![npm](https://img.shields.io/npm/v/smartin.svg)](https://www.npmjs.com/package/smartin)
+[![Node](https://img.shields.io/badge/Node-%3E%3D22.12.0-blue?logo=nodedotjs)](https://nodejs.org)
 [![Bun](https://img.shields.io/badge/Bun-%3E%3D1.3.0-blue?logo=bun)](https://bun.sh)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
@@ -13,11 +14,15 @@ A CLI for JavaScript and TypeScript projects; 3 features:
 ## Installation
 
 ```sh
+npm i -D smartin
+```
+
+```sh
 bun add -d smartin
 ```
 
 - CLI only: the package cannot be imported.
-- Bun only: requires [Bun](https://bun.sh) `>= 1.3.0` on your `PATH`. Node is not supported.
+- Runs on Node `>= 22.12.0` or [Bun](https://bun.sh) `>= 1.3.0`. The bin has a `node` shebang, so `npx smartin`, `bunx smartin` and `bun smartin` all run it in Node when Node is installed. To run it in Bun, add `--bun`: `bunx --bun smartin`, or `bun --bun run <script>` for a `package.json` script.
 - Tested on Linux, Windows, and macOS.
 - TypeScript is not required. The package has no runtime dependencies.
 
@@ -28,7 +33,11 @@ Run all commands from the project root.
 Every command requires the config file in the project root and the section of its feature (`license`, `export`, or `spec`). Without them, the command exits `2`. Create the config file:
 
 ```sh
-bun smartin --init
+npx smartin --init
+```
+
+```sh
+bunx smartin --init
 ```
 
 This writes `smartin.jsonc` (`--init --raw`: without comments). Fill in the `""` values or set them to `false`:
@@ -60,7 +69,7 @@ This writes `smartin.jsonc` (`--init --raw`: without comments). Fill in the `""`
 }
 ```
 
-`bun smartin --init <dir>` (e.g. `--init packages/a`) writes a nested config into the subfolder `<dir>`: the same template without `eol` and `spec`. `<dir>` must exist and lie below the current directory. See [Nested configs](#nested-configs-license-and-export).
+`smartin --init <dir>` (e.g. `--init packages/a`) writes a nested config into the subfolder `<dir>`: the same template without `eol` and `spec`. `<dir>` must exist and lie below the current directory. See [Nested configs](#nested-configs-license-and-export).
 
 ### Config file
 
