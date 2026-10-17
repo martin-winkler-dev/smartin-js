@@ -21,7 +21,7 @@ npm i -D smartin
 bun add -d smartin
 ```
 
-- CLI only: the package cannot be imported.
+- CLI, plus a [library API](#library-api) for the license and spec features.
 - Runs on Node `>= 22.12.0` or [Bun](https://bun.sh) `>= 1.3.0`. The bin has a `node` shebang, so `npx smartin`, `bunx smartin` and `bun smartin` all run it in Node when Node is installed. To run it in Bun, add `--bun`: `bunx --bun smartin`, or `bun --bun run <script>` for a `package.json` script.
 - Tested on Linux, Windows, and macOS.
 - TypeScript is not required. The package has no runtime dependencies.
@@ -182,7 +182,7 @@ The own block starts at line 1 (line 2 after a shebang). It holds up to four lin
 | `smartin spec lookup <id>` | list where id is used |
 | `smartin spec next` | print next free spec id |
 
-`--format json` works for every spec action except `update`.
+`--format json` works for every spec action. For `update`, put it before the id: `smartin spec update --format json <id> <text>`.
 
 The spec file is the first one found of `SPEC.md`, `spec.md`, `docs/SPEC.md`, `docs/spec.md`, relative to the project root. It lists one entry per spec:
 
@@ -207,6 +207,37 @@ Code and test files reference a spec in a JSDoc comment, with or without the tex
 - Only JSDoc comments (`/** */`) count. `//` and `/* */` comments are ignored.
 - `§` instead of a status marks a reference spec: it has an id but is not expected in code.
 - `sync` and `update` write only the spec file and the text part of `@spec` statements.
+
+## Library API
+
+The `license` and `spec` actions are also exported as functions. Each one runs the action like the CLI started in `cwd` and returns the document that `--format json` prints, as an object. `export` is CLI-only.
+
+```ts
+import { specNext, specCheck, licenseCheck } from 'smartin';
+
+const next = await specNext({ cwd: '/path/to/project' });
+if ('fatal' in next) {
+    console.error(next.fatal); // e.g. ["smartin spec requires smartin.jsonc. Run smartin --init."]
+} else if ('id' in next) {
+    console.log(next.id); // "0008"
+}
+```
+
+| Function | CLI |
+|----------|-----|
+| `licenseCheck({ cwd, currentYear? })` | `smartin license check` |
+| `licenseApply({ cwd, currentYear? })` | `smartin license apply` |
+| `licenseRemove({ cwd, all?, currentYear? })` | `smartin license remove [--all]` |
+| `specCheck({ cwd })` | `smartin spec check` |
+| `specSync({ cwd, fromSpec? })` | `smartin spec sync [--from-spec]` |
+| `specNext({ cwd })` | `smartin spec next` |
+| `specLookup({ cwd, id })` | `smartin spec lookup <id>` |
+| `specUpdate({ cwd, id, text })` | `smartin spec update <id> <text>` (an array `text` is `--lines`) |
+
+- `cwd` is the project root: the folder with the root config file.
+- Errors that stop a run (missing or invalid config, no `SPEC.md`, an invalid id, `@spec … not found`) are returned, not thrown: `{ tool, version, feature, action, exitCode, fatal: string[] }` with the CLI's messages. Check with `'fatal' in result`.
+- The functions never print. Writing actions (`licenseApply`, `licenseRemove`, `specSync`, `specUpdate`) write the files like the CLI.
+- ESM; CommonJS consumers on Node `>= 22.12` can `require('smartin')`. Types are included.
 
 ## Limitations
 
